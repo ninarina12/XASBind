@@ -9,14 +9,38 @@ absorption event into a shared embedding space:
 
 Data comes from the Materials Project XAS dataset.
 
-## Install
+## Environment setup
+
+Create an isolated Python environment, then install everything with pip. Conda
+provides just the interpreter; all packages come from pip (avoid mixing
+`conda install` and `pip install` in the same env).
 
 ```bash
-pip install -e .          # add ".[dev]" for tests + matplotlib
+conda create -n xasbind python=3.11
+conda activate xasbind
+pip install -e ".[dev]"     # drop "[dev]" to skip pytest + matplotlib
+```
+
+`pyproject.toml` lists every dependency, so that single pip command installs the
+full stack plus this package in editable mode (your code changes take effect
+without reinstalling). A `venv` works just as well in place of conda:
+
+```bash
+python3.11 -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
 ```
 
 The `src/` layout means scripts and tests import the package
 (`from xasbind.data import make_dataloaders`) rather than via path hacks.
+
+**GPU vs CPU PyTorch.** `pip install` pulls `torch` from PyPI, which on Linux
+defaults to a CUDA build. To pin a specific CUDA version (or force CPU), install
+torch from the official index after the steps above, e.g.:
+
+```bash
+pip install torch --index-url https://download.pytorch.org/whl/cu124   # CUDA 12.4
+pip install torch --index-url https://download.pytorch.org/whl/cpu     # CPU only
+```
 
 ## Pipeline
 
@@ -62,4 +86,3 @@ pytest
 ## Notes
 
 - Set the Materials Project key via `MP_API_KEY`; never commit it.
-
