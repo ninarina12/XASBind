@@ -23,6 +23,7 @@ from pathlib import Path
 import h5py
 import pandas as pd
 from mp_api.client import MPRester
+import hashlib
 from tqdm import tqdm
 
 
@@ -32,7 +33,8 @@ def fetch(api_key: str, output_dir: Path) -> None:
     metadata_file = output_dir / "metadata.csv"
 
     with MPRester(api_key=api_key) as mpr:
-        xas_docs = mpr.materials.xas.search(fields=["material_id", "spectrum"])
+        # xas_docs = mpr.materials.xas.search(fields=["material_id", "spectrum"])
+        xas_docs = mpr.materials.xas.search(fields=["spectrum"])
 
     saved = skipped = 0
     metadata_list: list[dict] = []
@@ -41,7 +43,9 @@ def fetch(api_key: str, output_dir: Path) -> None:
         for xas_doc in tqdm(xas_docs, total=len(xas_docs), desc="Writing spectra"):
             try:
                 spectrum = xas_doc.spectrum
-                mp_id = str(xas_doc.material_id)
+                # mp_id = str(xas_doc.material_id)
+                struct_dict = json.dumps(spectrum.structure.as_dict(), sort_keys=True)
+                mp_id = "struct-" + hashlib.md5(struct_dict.encode()).hexdigest()[:12]
                 absorbing_element = str(spectrum.absorbing_element)
                 edge = str(spectrum.edge)
                 spectrum_type = spectrum.spectrum_type
