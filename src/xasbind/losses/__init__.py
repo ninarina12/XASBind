@@ -1,1 +1,1 @@
-"""Contrastive / bind-style losses. TODO: implement."""
+"""Contrastive / bind-style loss."""
